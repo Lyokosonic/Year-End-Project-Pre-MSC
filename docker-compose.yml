@@ -1,0 +1,71 @@
+version: '3'
+services:
+
+  mongo:
+      image: mongo
+      container_name: mongo
+      ports:
+        - "27017:27017"
+      networks:
+        - app-network
+        - mongo
+
+  mongo_seed:
+    image: mongo
+    container_name: mongo_seed
+    links:
+      - mongo
+    volumes:
+      - ./dump/:/mongo-seed/dump/
+      - ./server/src/assets/scripts/import-mongodata.sh:/mongo-seed/import-mongodata.sh
+    command:
+      /mongo-seed/import-mongodata.sh
+    networks:
+      - mongo
+
+  server:
+      build:
+        context: ./server
+        dockerfile: Dockerfile
+      container_name: server
+      volumes:
+       - ./server/:/usr/src/server
+       - /usr/src/server/node_modules
+      ports:
+        - "5000:5000"
+      depends_on:
+        - mongo
+      env_file: ./server/.env
+      environment:
+        - MONGO_HOSTNAME=mongo
+        - MONGO_PORT=27017
+        - MONGO_DB=LAM_Industries
+      networks:
+        - app-network
+
+  app:
+    build:
+      context: ./ecommerce-app
+      dockerfile: Dockerfile
+    container_name: app
+    volumes:
+      - ./ecommerce-app/:/usr/src/application
+      - /usr/src/application/node_modules
+    stdin_open: true
+    depends_on:
+      - mongo
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+      driver: bridge
+  mongo:
+      driver: bridge
+
+volumes:
+  node_modules:
+  web-root:
+    driver: local

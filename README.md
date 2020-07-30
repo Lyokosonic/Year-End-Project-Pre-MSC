@@ -1,6 +1,6 @@
 # Year-End-Project-Pre-MSC
 
-Projet d'application web e-commerce développé avec Node.js, Express, Redux et React.
+Projet d'application web e-commerce développé avec Docker, Node.js, Express, Redux et React, eslint.
 <br/>
 <br/>
 documentation: <br/>
